@@ -1,10 +1,11 @@
 from optparse import OptionParser
 
 class Var(object):
-    def __init__(self, shorthand, longhand, default=None):
-        self.shorthand = shorthand
-        self.longhand = longhand
+    def __init__(self, short=None, long=None, default=None, help=None):
+        self.short = short
+        self.long = long
         self.default = default
+        self.help = help
     
     def convert(self, data):
         return data
