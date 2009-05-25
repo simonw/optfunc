@@ -10,13 +10,21 @@ class Var(object):
     def convert(self, data):
         return data
 
-class String(Var):
-    def convert(self, data):
-        return str(data)
+class Str(Var):
+    covert = str
 
 class Bool(Var):
     def convert(self, data):
-        return data.strip() not in ('0', '', 'false', 'False')
+        return str(data).strip() not in ('0', '', 'false', 'False')
+
+class Int(Var):
+    convert = int
+
+# aliases
+Variable = Var
+String = Str
+Boolean = Bool
+Integer = Int
 
 def run(func):
     # TODO: introspect function, build up command line args, execute it
