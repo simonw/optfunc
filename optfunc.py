@@ -24,10 +24,13 @@ def func_to_optionparser(func):
     # Build the OptionParser:
     opt = ErrorCollectingOptionParser(usage = func.__doc__)
     
+    helpdict = getattr(func, 'optfunc_arghelp', {})
+    
     # Add the options, automatically detecting their -short and --long names
     shortnames = set()
-    for name, example in options.items():
+    for funcname, example in options.items():
         # They either explicitly set the short with x_blah...
+        name = funcname
         if single_char_prefix_re.match(name):
             short = name[0]
             name = name[2:]
@@ -45,7 +48,8 @@ def func_to_optionparser(func):
         else:
             action = 'store'
         opt.add_option(make_option(
-            short_name, long_name, action=action, dest=name, default=example
+            short_name, long_name, action=action, dest=name, default=example,
+            help = helpdict.get(funcname, '')
         ))
     
     return opt, required_args
@@ -56,19 +60,38 @@ def resolve_args(func, argv):
     
     # Do we have correct number af required args?
     if len(required_args) != len(args):
-        raise TypeError, 'Requires %d arguments, got %d' % (
-            len(required_args), len(args)
-        )
+        if not hasattr(func, 'optfunc_notstrict'):
+            parser._errors.append('Required %d arguments, got %d' % (
+                len(required_args), len(args)
+            ))
     
+    # Ensure there are enough arguments even if some are missing
+    args += [None] * (len(required_args) - len(args))
     for i, name in enumerate(required_args):
         setattr(options, name, args[i])
     
     return options.__dict__, parser._errors
 
-def run(func, argv=None):
+def run(func, argv=None, stderr=sys.stderr):
     argv = argv or sys.argv[1:]
     resolved, errors = resolve_args(func, argv)
     if not errors:
-        return func(**resolved)
+        try:
+            return func(**resolved)
+        except Exception, e:
+            stderr.write(str(e) + '\n')
     else:
-        print "ERRORS: %s" % errors
+        stderr.write("%s\n" % '\n'.join(errors))
+
+# Decorators
+def notstrict(fn):
+    fn.optfunc_notstrict = True
+    return fn
+
+def arghelp(name, help):
+    def inner(fn):
+        d = getattr(fn, 'optfunc_arghelp', {})
+        d[name] = help
+        setattr(fn, 'optfunc_arghelp', d)
+        return fn
+    return inner
