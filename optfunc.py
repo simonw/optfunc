@@ -30,7 +30,7 @@ def func_to_optionparser(func):
     helpdict = getattr(func, 'optfunc_arghelp', {})
     
     # Add the options, automatically detecting their -short and --long names
-    shortnames = set()
+    shortnames = set(['h'])
     for funcname, example in options.items():
         # They either explicitly set the short with x_blah...
         name = funcname

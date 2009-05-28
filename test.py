@@ -85,6 +85,13 @@ class TestOptFunc(unittest.TestCase):
         parser, required_args = optfunc.func_to_optionparser(func1)
         strs = [str(o) for o in parser.option_list]
         self.assertEqual(strs, ['-h/--help', '-v/--version', '-e/--verbose'])
+
+        def func2(one, host=''):
+            pass
+        
+        parser, required_args = optfunc.func_to_optionparser(func2)
+        strs = [str(o) for o in parser.option_list]
+        self.assertEqual(strs, ['-h/--help', '-o/--host'])
     
     def test_short_option_can_be_named_explicitly(self):
         def func1(one, option='', q_verbose=False):
