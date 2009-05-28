@@ -33,7 +33,7 @@ class TestOptFunc(unittest.TestCase):
         
         has_run = [False]
         def func(one, two=optfunc.Var('-o', '--option')):
-            has_run[0] = True
+            has_run[0] = (one, two)
         
         # Should have -o option as well as -h option
         parser, required_args = optfunc.func_to_optionparser(func)
@@ -45,7 +45,17 @@ class TestOptFunc(unittest.TestCase):
         # Should have one required arg
         self.assertEqual(required_args, ['one'])
         
+        # Should execute
+        self.assert_(not has_run[0])
+        optfunc.run(func, ['the-required', '-o', 'the-option'])
+        self.assert_(has_run[0])
+        self.assertEqual(has_run[0], ('the-required', 'the-option'))
         
-        
+        # Option should be optional
+        has_run[0] = False
+        optfunc.run(func, ['required2'])
+        self.assert_(has_run[0])
+        self.assertEqual(has_run[0], ('required2', None))
+
 if __name__ == '__main__':
     unittest.main()
