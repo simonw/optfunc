@@ -27,12 +27,19 @@ Here's what the API looks like so far:
 
 And here's the resulting command-line interface:
 
-    $ python demo.py --help
-    Usage: demo.py <filename> [--verbose] - output file content in uppercase
+    $ ./demo.py --help
+    Usage: demo.py <file> [--verbose] - output file content in uppercase
     
     Options:
       -h, --help     show this help message and exit
       -v, --verbose  
+    $ ./demo.py README.txt 
+    OPTFUNC
+    ...
+    $ ./demo.py README.txt -v
+    Processing 2049 bytes...
+    OPTFUNC
+    ...
 
 optfunc also supports two decorators for stuff I couldn't work out how to 
 shoehorn in to a regular function definition. geocode.py shows them in action:
