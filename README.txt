@@ -3,13 +3,15 @@ optfunc
 
 Parse command line options in Python using function introspection.
 
+Post feedback here: http://simonwillison.net/2009/May/28/optfunc/
+
 I can never remember how to use any of Python's regular command line parsing
 libraries.
 
 optfunc uses introspection to make a Python function available as a command
 line utility. It's syntactic sugar around optparse from the standard library.
 
-Very early stages at the moment. Here's what the API looks like so far:
+Here's what the API looks like so far:
 
     import optfunc
     
@@ -25,12 +27,27 @@ Very early stages at the moment. Here's what the API looks like so far:
 
 And here's the resulting command-line interface:
 
-    $ python demo.py -h
+    $ python demo.py --help
     Usage: demo.py <filename> [--verbose] - output file content in uppercase
-
+    
     Options:
       -h, --help     show this help message and exit
       -v, --verbose  
+
+optfunc also supports two decorators for stuff I couldn't work out how to 
+shoehorn in to a regular function definition. geocode.py shows them in action:
+
+    @optfunc.notstrict
+    @optfunc.arghelp('list_geocoders', 'list available geocoders and exit')
+    def geocode(s, api_key='', geocoder='google', list_geocoders=False):
+        # ...
+
+@notstrict means "don't throw an error if one of the required positional 
+arguments is missing" - in the above example we use this because we still want
+the list_geocoders argument to work even if a string has not been provided.
+
+@arghelp('arg-name', 'help text') allows you to provide help on individual 
+arguments, which will then be displayed when --help is called.
 
 TODO:
 
