@@ -148,4 +148,4 @@ TODO
 * Proper unix error semantics (sys.exit(1) etc)
 * Allow the function to be a generator, print iterations to stdout
 * Support for *args (I don't think **kwargs makes sense for optfunc)
-* run(foo, bar) - dispatch to different functions based on first argument
+* Subcommands need to interact with --help better
