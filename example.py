@@ -1,8 +1,11 @@
-from optfunc import run, Str
+import optfunc
 
-def upper(filename, v = Str('-v', '--version')):
-    "Usage: %s foo bar - do something useful"
-    print open(filename).read().upper()
+def upper(filename, verbose = False):
+    "Usage: %prog <filename> [--verbose] - output file content in uppercase"
+    s = open(filename).read()
+    if verbose:
+        print "Processing %s bytes..." % len(s)
+    print s.upper()
 
 if __name__ == '__main__':
-    run(upper)
+    optfunc.run(upper)

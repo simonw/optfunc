@@ -13,11 +13,24 @@ Very early stages at the moment. Here's what the API looks like so far:
 
     import optfunc
     
-    def upper(filename, v = optfunc.Str('-v', '--version')):
-        "Usage: %s foo bar - do something useful"
-        print open(filename).read().upper()
+    def upper(filename, verbose = False):
+        "Usage: %s <filename> [--verbose] - output file content in uppercase"
+        s = open(filename).read()
+        if verbose:
+            print "Processing %s bytes..." % len(s)
+        print s.upper()
     
     if __name__ == '__main__':
         optfunc.run(upper)
+        run(upper)
+
+And here's the resulting command-line interface:
+
+    $ python demo.py -h
+    Usage: demo.py <filename> [--verbose] - output file content in uppercase
+
+    Options:
+      -h, --help     show this help message and exit
+      -v, --verbose  
 
 TODO: Support for different types of argument, *args and **kwargs, and more.
