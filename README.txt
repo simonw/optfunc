@@ -38,3 +38,4 @@ TODO:
 * Special handling for 'stdin' as an argument name
 * Proper unix error semantics (sys.exit(1) etc)
 * Figure out a way to annotate arguments with their help text - a decorator?
+* Allow the function to be a generator, print iterations to stdout
