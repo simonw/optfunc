@@ -41,6 +41,53 @@ And here's the resulting command-line interface:
     OPTFUNC
     ...
 
+How arguments work
+------------------
+
+Non-keyword arguments are treated as required arguments - optfunc.run will 
+throw an error if they number of arguments provided on the command line 
+doesn't match the number expected by the function (unless @notstrict is used, 
+see below).
+
+Keyword arguments with defaults are treated as options. At the moment, only 
+string and boolean arguments are supported. Other types are planned.
+
+Consider the following:
+
+    def geocode(s, api_key='', geocoder='google', list_geocoders=False):
+
+'s' is a required argument. api_key, geocoder and list_geocoders are all 
+options, with defaults provided. Since list_geocoders has a boolean as its 
+default it will be treated slightly differently (in optparse terms, it will 
+store True if the flag is provided on the command line and False otherwise).
+
+The command line options are derived from the parameter names like so:
+
+    Options:
+      -h, --help            show this help message and exit
+      -l, --list-geocoders
+      -a API_KEY, --api-key=API_KEY
+      -g GEOCODER, --geocoder=GEOCODER
+
+Note that the boolean --list-geocoders is a flag, not an option that sets a
+value.
+
+The short option is derived from the first letter of the parameter. If that 
+character is already in use, the second character will be used and so on.
+
+The long option is the full name of the parameter with underscores converted 
+to hyphens.
+
+If you want complete control over the name of the options, simply name your 
+parameter as follows:
+
+    def foo(q_custom_name=False):
+
+This will result in a short option of -q and a long option of --custom-name.
+
+Decorators
+----------
+
 optfunc also supports two decorators for stuff I couldn't work out how to 
 shoehorn in to a regular function definition. geocode.py shows them in action:
 
@@ -56,7 +103,8 @@ the list_geocoders argument to work even if a string has not been provided.
 @arghelp('arg-name', 'help text') allows you to provide help on individual 
 arguments, which will then be displayed when --help is called.
 
-TODO:
+TODO
+----
 
 * Support for different argument types (int, string, filehandle, choices)
 * Special handling for 'stdin' as an argument name
