@@ -1,6 +1,8 @@
-import optfunc
+from optfunc import run, Str
 
-@optfunc.run
-def foo(filename, v = optfunc.Str('-v', '--version')):
+def foo(filename, v = Str('-v', '--version')):
     "Usage: %s foo bar - do something useful"
     pass
+
+if __name__ == '__main__':
+    run(foo)
