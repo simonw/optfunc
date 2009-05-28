@@ -132,6 +132,65 @@ class TestOptFunc(unittest.TestCase):
         opt = parser.option_list[1]
         self.assertEqual(str(opt), '-f/--foo')
         self.assertEqual(opt.help, 'help about foo')
+    
+    def test_multiple_invalid_subcommand(self):
+        "With multiple subcommands, invalid first arg should raise an error"
+        def one(arg):
+            pass
+        def two(arg):
+            pass
+        def three(arg):
+            pass
+        
+        # Invalid first argument should raise an error
+        e = StringIO()
+        optfunc.run([one, two], ['three'], stderr=e)
+        self.assertEqual(
+            e.getvalue().strip(), "Unknown command: try 'one' or 'two'"
+        )
+        e = StringIO()
+        optfunc.run([one, two, three], ['four'], stderr=e)
+        self.assertEqual(
+            e.getvalue().strip(),
+            "Unknown command: try 'one', 'two' or 'three'"
+        )
+        
+        # No argument at all should raise an error
+        e = StringIO()
+        optfunc.run([one, two, three], [], stderr=e)
+        self.assertEqual(
+            e.getvalue().strip(),
+            "Unknown command: try 'one', 'two' or 'three'"
+        )
+    
+    def test_multiple_valid_subcommand_invalid_argument(self):
+        "Subcommands with invalid arguments should report as such"
+        def one(arg):
+            executed.append(('one', arg))
+        
+        def two(arg):
+            executed.append(('two', arg))
+
+        e = StringIO()
+        executed = []
+        optfunc.run([one, two], ['one'], stderr=e)
+        self.assertEqual(
+            e.getvalue().strip(), 'one: Required 1 arguments, got 0'
+        )
+    
+    def test_multiple_valid_subcommand_valid_argument(self):
+        "Subcommands with valid arguments should execute as expected"
+        def one(arg):
+            executed.append(('one', arg))
+        
+        def two(arg):
+            executed.append(('two', arg))
+
+        e = StringIO()
+        executed = []
+        optfunc.run([one, two], ['two', 'arg!'], stderr=e)
+        self.assertEqual(e.getvalue().strip(), '')
+        self.assertEqual(executed, [('two', 'arg!')])
 
     def test_run_class(self):
         class Class:

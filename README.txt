@@ -85,6 +85,43 @@ parameter as follows:
 
 This will result in a short option of -q and a long option of --custom-name.
 
+Subcommands
+-----------
+
+Some command line applications feature subcommands, with the first argument 
+to the application indicating which subcommand should be executed.
+
+optfunc has the beginnings of support for this - you can pass an array of 
+functions to the optfunc.run() and the names of the functions will be used 
+to select a subcommand based on the first argument:
+
+    import optfunc
+    
+    def one(arg):
+        print "One: %s" % arg
+    
+    def two(arg):
+        print "Two: %s" % arg
+    
+    def three(arg):
+        print "Three: %s" % arg
+    
+    if __name__ == '__main__':
+        optfunc.run([one, two, three])
+
+Usage looks like this:
+
+    $ ./subcommands_demo.py    
+    Unknown command: try 'one', 'two' or 'three'
+    $ ./subcommands_demo.py one
+    one: Required 1 arguments, got 0
+    $ ./subcommands_demo.py two arg
+    Two: arg
+
+This approach is limited in that help can be provided for an individual option 
+but not for the application as a whole. If anyone knows how to get optparse to
+handle the subcommand pattern please let me know.
+
 Decorators
 ----------
 

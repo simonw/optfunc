@@ -85,23 +85,48 @@ def resolve_args(func, argv):
     
     return options.__dict__, parser._errors
 
-def run(obj, argv=None, stderr=sys.stderr):
+def run(func, argv=None, stderr=sys.stderr):
     argv = argv or sys.argv[1:]
-    if inspect.isfunction(obj):
-        resolved, errors = resolve_args(obj, argv)
-    elif inspect.isclass(obj):
-        if hasattr(obj, '__init__'):
-            resolved, errors = resolve_args(obj.__init__, argv)
+    include_func_name_in_errors = False
+    # Deal with multiple functions
+    if isinstance(func, (tuple, list)):
+        funcs = dict([
+            (fn.__name__, fn) for fn in func
+        ])
+        try:
+            func_name = argv.pop(0)
+        except IndexError:
+            func_name = None
+        if func_name not in funcs:
+            names = ["'%s'" % fn.__name__ for fn in func]
+            s = ', '.join(names[:-1])
+            if len(names) > 1:
+                s += ' or %s' % names[-1]
+            stderr.write("Unknown command: try %s\n" % s)
+            return
+        func = funcs[func_name]
+        include_func_name_in_errors = True
+
+    if inspect.isfunction(func):
+        resolved, errors = resolve_args(func, argv)
+    elif inspect.isclass(func):
+        if hasattr(func, '__init__'):
+            resolved, errors = resolve_args(func.__init__, argv)
         else:
             resolved, errors = {}, []
     else:
         raise TypeError('arg is not a Python function or class')
+    
     if not errors:
         try:
-            return obj(**resolved)
+            return func(**resolved)
         except Exception, e:
+            if include_func_name_in_errors:
+                stderr.write('%s: ' % func.__name__)
             stderr.write(str(e) + '\n')
     else:
+        if include_func_name_in_errors:
+            stderr.write('%s: ' % func.__name__)
         stderr.write("%s\n" % '\n'.join(errors))
 
 # Decorators
