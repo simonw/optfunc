@@ -16,10 +16,13 @@ def func_to_optionparser(func):
     args, varargs, varkw, defaultvals = inspect.getargspec(func)
     defaultvals = defaultvals or ()
     options = dict(zip(args[-len(defaultvals):], defaultvals))
+    argstart = 0
+    if func.__name__ == '__init__':
+        argstart = 1
     if defaultvals:
-        required_args = args[:-len(defaultvals)]
+        required_args = args[argstart:-len(defaultvals)]
     else:
-        required_args = args
+        required_args = args[argstart:]
     
     # Build the OptionParser:
     opt = ErrorCollectingOptionParser(usage = func.__doc__)
@@ -72,12 +75,20 @@ def resolve_args(func, argv):
     
     return options.__dict__, parser._errors
 
-def run(func, argv=None, stderr=sys.stderr):
+def run(obj, argv=None, stderr=sys.stderr):
     argv = argv or sys.argv[1:]
-    resolved, errors = resolve_args(func, argv)
+    if inspect.isfunction(obj):
+        resolved, errors = resolve_args(obj, argv)
+    elif inspect.isclass(obj):
+        if hasattr(obj, '__init__'):
+            resolved, errors = resolve_args(obj.__init__, argv)
+        else:
+            resolved, errors = {}, []
+    else:
+        raise TypeError('arg is not a Python function or class')
     if not errors:
         try:
-            return func(**resolved)
+            return obj(**resolved)
         except Exception, e:
             stderr.write(str(e) + '\n')
     else:
