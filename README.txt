@@ -14,7 +14,7 @@ Very early stages at the moment. Here's what the API looks like so far:
     import optfunc
     
     def upper(filename, verbose = False):
-        "Usage: %s <filename> [--verbose] - output file content in uppercase"
+        "Usage: %prog <file> [--verbose] - output file content in uppercase"
         s = open(filename).read()
         if verbose:
             print "Processing %s bytes..." % len(s)

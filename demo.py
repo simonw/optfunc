@@ -1,7 +1,7 @@
 import optfunc
 
 def upper(filename, verbose = False):
-    "Usage: %prog <filename> [--verbose] - output file content in uppercase"
+    "Usage: %prog <file> [--verbose] - output file content in uppercase"
     s = open(filename).read()
     if verbose:
         print "Processing %s bytes..." % len(s)
