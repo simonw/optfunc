@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import optfunc
 
 def upper(filename, verbose = False):

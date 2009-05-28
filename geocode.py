@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Depends on geocoders from http://github.com/simonw/geocoders being on the 
 # python path.
 import geocoders
