@@ -100,6 +100,10 @@ class TestOptFunc(unittest.TestCase):
         parser, required_args = optfunc.func_to_optionparser(func1)
         strs = [str(o) for o in parser.option_list]
         self.assertEqual(strs, ['-h/--help', '-o/--option', '-q/--verbose'])
+
+        e = StringIO()
+        optfunc.run(func1, ['one', '-q'], stderr=e)
+        self.assertEqual(e.getvalue().strip(), '')
     
     def test_notstrict(self):
         "@notstrict tells optfunc to tolerate missing required arguments"

@@ -6,9 +6,18 @@ single_char_prefix_re = re.compile('^[a-zA-Z0-9]_')
 class ErrorCollectingOptionParser(OptionParser):
     def __init__(self, *args, **kwargs):
         self._errors = []
+        self._custom_names = {}
         # can't use super() because OptionParser is an old style class
         OptionParser.__init__(self, *args, **kwargs)
     
+    def parse_args(self, argv):
+        options, args = OptionParser.parse_args(self, argv)
+        for k,v in options.__dict__.iteritems():
+            if k in self._custom_names:
+                options.__dict__[self._custom_names[k]] = v
+                del options.__dict__[k]
+        return options, args
+
     def error(self, msg):
         self._errors.append(msg)
 
@@ -37,6 +46,7 @@ def func_to_optionparser(func):
         if single_char_prefix_re.match(name):
             short = name[0]
             name = name[2:]
+            opt._custom_names[name] = funcname
         # Or we pick the first letter from the name not already in use:
         else:
             for short in name:
