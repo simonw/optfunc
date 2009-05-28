@@ -22,7 +22,6 @@ Very early stages at the moment. Here's what the API looks like so far:
     
     if __name__ == '__main__':
         optfunc.run(upper)
-        run(upper)
 
 And here's the resulting command-line interface:
 
@@ -33,4 +32,9 @@ And here's the resulting command-line interface:
       -h, --help     show this help message and exit
       -v, --verbose  
 
-TODO: Support for different types of argument, *args and **kwargs, and more.
+TODO:
+
+* Support for different argument types (int, string, filehandle, choices)
+* Special handling for 'stdin' as an argument name
+* Proper unix error semantics (sys.exit(1) etc)
+* Figure out a way to annotate arguments with their help text - a decorator?
