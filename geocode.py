@@ -5,7 +5,7 @@ import optfunc
 import os
 
 # We use notstrict because we want to be able to trigger the list_geocoders
-# option without being forced to reply the normally mandatory 's' argument
+# option without being forced to provide the normally mandatory 's' argument
 @optfunc.notstrict
 @optfunc.arghelp('list_geocoders', 'list available geocoders and exit')
 def geocode(s, api_key='', geocoder='google', list_geocoders=False):
