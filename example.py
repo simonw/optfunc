@@ -1,8 +1,8 @@
 from optfunc import run, Str
 
-def foo(filename, v = Str('-v', '--version')):
+def upper(filename, v = Str('-v', '--version')):
     "Usage: %s foo bar - do something useful"
-    pass
+    print open(filename).read().upper()
 
 if __name__ == '__main__':
-    run(foo)
+    run(upper)
