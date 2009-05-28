@@ -1,5 +1,7 @@
 from optparse import OptionParser, make_option
-import sys, inspect
+import sys, inspect, re
+
+single_char_prefix_re = re.compile('^[a-zA-Z0-9]_')
 
 class ErrorCollectingOptionParser(OptionParser):
     def __init__(self, *args, **kwargs):
@@ -19,10 +21,24 @@ def func_to_optionparser(func):
     else:
         required_args = args
     
-    # Now build the OptionParser
+    # Build the OptionParser:
     opt = ErrorCollectingOptionParser(usage = func.__doc__)
+    
+    # Add the options, automatically detecting their -short and --long names
+    shortnames = set()
     for name, example in options.items():
-        short_name = '-%s' % name[0]
+        # They either explicitly set the short with x_blah...
+        if single_char_prefix_re.match(name):
+            short = name[0]
+            name = name[2:]
+        # Or we pick the first letter from the name not already in use:
+        else:
+            for short in name:
+                if short not in shortnames:
+                    break
+        
+        shortnames.add(short)
+        short_name = '-%s' % short
         long_name = '--%s' % name.replace('_', '-')
         if example in (True, False, bool):
             action = 'store_true'
