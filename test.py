@@ -85,6 +85,13 @@ class TestOptFunc(unittest.TestCase):
         parser, required_args = optfunc.func_to_optionparser(func1)
         strs = [str(o) for o in parser.option_list]
         self.assertEqual(strs, ['-h/--help', '-v/--version', '-e/--verbose'])
+
+        def func2(one, host=''):
+            pass
+        
+        parser, required_args = optfunc.func_to_optionparser(func2)
+        strs = [str(o) for o in parser.option_list]
+        self.assertEqual(strs, ['-h/--help', '-o/--host'])
     
     def test_short_option_can_be_named_explicitly(self):
         def func1(one, option='', q_verbose=False):
@@ -93,6 +100,10 @@ class TestOptFunc(unittest.TestCase):
         parser, required_args = optfunc.func_to_optionparser(func1)
         strs = [str(o) for o in parser.option_list]
         self.assertEqual(strs, ['-h/--help', '-o/--option', '-q/--verbose'])
+
+        e = StringIO()
+        optfunc.run(func1, ['one', '-q'], stderr=e)
+        self.assertEqual(e.getvalue().strip(), '')
     
     def test_notstrict(self):
         "@notstrict tells optfunc to tolerate missing required arguments"
@@ -180,6 +191,36 @@ class TestOptFunc(unittest.TestCase):
         optfunc.run([one, two], ['two', 'arg!'], stderr=e)
         self.assertEqual(e.getvalue().strip(), '')
         self.assertEqual(executed, [('two', 'arg!')])
+
+    def test_run_class(self):
+        class Class:
+            def __init__(self, one, option=''):
+                self.has_run = [(one, option)]
+        
+        class NoInitClass:
+            pass
+
+        # Should execute
+        e = StringIO()
+        c = optfunc.run(Class, ['the-required', '-o', 'the-option'], stderr=e)
+        self.assertEqual(e.getvalue().strip(), '')
+        self.assert_(c.has_run[0])
+        self.assertEqual(c.has_run[0], ('the-required', 'the-option'))
+        
+        # Option should be optional
+        c = None
+        e = StringIO()
+        c = optfunc.run(Class, ['required2'], stderr=e)
+        self.assertEqual(e.getvalue().strip(), '')
+        self.assert_(c.has_run[0])
+        self.assertEqual(c.has_run[0], ('required2', ''))
+
+        # Classes without init should work too
+        c = None
+        e = StringIO()
+        c = optfunc.run(NoInitClass, [], stderr=e)
+        self.assert_(c)
+        self.assertEqual(e.getvalue().strip(), '')
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,9 +6,18 @@ single_char_prefix_re = re.compile('^[a-zA-Z0-9]_')
 class ErrorCollectingOptionParser(OptionParser):
     def __init__(self, *args, **kwargs):
         self._errors = []
+        self._custom_names = {}
         # can't use super() because OptionParser is an old style class
         OptionParser.__init__(self, *args, **kwargs)
     
+    def parse_args(self, argv):
+        options, args = OptionParser.parse_args(self, argv)
+        for k,v in options.__dict__.iteritems():
+            if k in self._custom_names:
+                options.__dict__[self._custom_names[k]] = v
+                del options.__dict__[k]
+        return options, args
+
     def error(self, msg):
         self._errors.append(msg)
 
@@ -16,10 +25,13 @@ def func_to_optionparser(func):
     args, varargs, varkw, defaultvals = inspect.getargspec(func)
     defaultvals = defaultvals or ()
     options = dict(zip(args[-len(defaultvals):], defaultvals))
+    argstart = 0
+    if func.__name__ == '__init__':
+        argstart = 1
     if defaultvals:
-        required_args = args[:-len(defaultvals)]
+        required_args = args[argstart:-len(defaultvals)]
     else:
-        required_args = args
+        required_args = args[argstart:]
     
     # Build the OptionParser:
     opt = ErrorCollectingOptionParser(usage = func.__doc__)
@@ -27,13 +39,14 @@ def func_to_optionparser(func):
     helpdict = getattr(func, 'optfunc_arghelp', {})
     
     # Add the options, automatically detecting their -short and --long names
-    shortnames = set()
+    shortnames = set(['h'])
     for funcname, example in options.items():
         # They either explicitly set the short with x_blah...
         name = funcname
         if single_char_prefix_re.match(name):
             short = name[0]
             name = name[2:]
+            opt._custom_names[name] = funcname
         # Or we pick the first letter from the name not already in use:
         else:
             for short in name:
@@ -93,8 +106,17 @@ def run(func, argv=None, stderr=sys.stderr):
             return
         func = funcs[func_name]
         include_func_name_in_errors = True
+
+    if inspect.isfunction(func):
+        resolved, errors = resolve_args(func, argv)
+    elif inspect.isclass(func):
+        if hasattr(func, '__init__'):
+            resolved, errors = resolve_args(func.__init__, argv)
+        else:
+            resolved, errors = {}, []
+    else:
+        raise TypeError('arg is not a Python function or class')
     
-    resolved, errors = resolve_args(func, argv)
     if not errors:
         try:
             return func(**resolved)
