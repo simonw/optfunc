@@ -28,6 +28,4 @@ def geocode(s, api_key='', geocoder='google', list_geocoders=False):
     name, (lat, lon) =  mod.geocoder(api_key)(s)
     print '%s\t%s\t%s' % (name, lat, lon)
 
-if __name__ == '__main__':
-    optfunc.run(geocode)
-        
+optfunc.main(geocode)

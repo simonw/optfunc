@@ -129,6 +129,11 @@ def run(func, argv=None, stderr=sys.stderr):
             stderr.write('%s: ' % func.__name__)
         stderr.write("%s\n" % '\n'.join(errors))
 
+def main(*args, **kwargs):
+    prev_frame = inspect.stack()[-1][0]
+    if inspect.getmodule(prev_frame).__name__ == '__main__':
+        run(*args, **kwargs)
+
 # Decorators
 def notstrict(fn):
     fn.optfunc_notstrict = True

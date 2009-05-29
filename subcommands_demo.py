@@ -10,5 +10,4 @@ def two(arg):
 def three(arg):
     print "Three: %s" % arg
 
-if __name__ == '__main__':
-    optfunc.run([one, two, three])
+optfunc.main([one, two, three])
