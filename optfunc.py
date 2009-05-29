@@ -71,6 +71,7 @@ def resolve_args(func, argv):
     parser, required_args = func_to_optionparser(func)
     options, args = parser.parse_args(argv)
     
+    # Special case for stdin
     if 'stdin' in required_args:
         required_args.remove('stdin')
         options.optfunc_use_stdin = True
@@ -92,7 +93,8 @@ def resolve_args(func, argv):
 def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
     argv = argv or sys.argv[1:]
     include_func_name_in_errors = False
-    # Deal with multiple functions
+    
+    # Handle multiple functions
     if isinstance(func, (tuple, list)):
         funcs = dict([
             (fn.__name__, fn) for fn in func
@@ -121,6 +123,7 @@ def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
     else:
         raise TypeError('arg is not a Python function or class')
     
+    # Special case for stdin
     if resolved.pop('optfunc_use_stdin', False):
         resolved['stdin'] = stdin
     
