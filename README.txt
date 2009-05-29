@@ -41,6 +41,18 @@ And here's the resulting command-line interface:
     OPTFUNC
     ...
 
+If you don't mind relying on some stack inspecting magic, you can replace the 
+__name__ == '__main__ idiom with the following:
+
+    optfunc.main(upper)
+
+If you like really short scripts, you can even use this function as a 
+decorator:
+
+    @optfunc.main
+    def upper(filename):
+        print open(filename).read().upper()
+
 How arguments work
 ------------------
 
