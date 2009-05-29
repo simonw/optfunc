@@ -97,6 +97,25 @@ parameter as follows:
 
 This will result in a short option of -q and a long option of --custom-name.
 
+Special arguments
+-----------------
+
+Arguments with the names 'stdin', 'stdout' or 'stderr' will be automatically 
+passed the relevant Python objects, for example:
+    
+    #!/usr/bin/env python
+    # upper.py
+    import optfunc
+    
+    @optfunc.main
+    def upper_stdin(stdin, stdout):
+        stdout.write(stdin.read().upper())
+
+Does the following:
+
+    $ echo "Hello, world" | ./upper.py
+    HELLO, WORLD
+
 Subcommands
 -----------
 

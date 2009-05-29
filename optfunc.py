@@ -71,10 +71,11 @@ def resolve_args(func, argv):
     parser, required_args = func_to_optionparser(func)
     options, args = parser.parse_args(argv)
     
-    # Special case for stdin
-    if 'stdin' in required_args:
-        required_args.remove('stdin')
-        options.optfunc_use_stdin = True
+    # Special case for stdin/stdout/stderr
+    for pipe in ('stdin', 'stdout', 'stderr'):
+        if pipe in required_args:
+            required_args.remove(pipe)
+            setattr(options, 'optfunc_use_%s' % pipe, True)
     
     # Do we have correct number af required args?
     if len(required_args) != len(args):
@@ -90,7 +91,9 @@ def resolve_args(func, argv):
     
     return options.__dict__, parser._errors
 
-def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
+def run(
+        func, argv=None, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr
+    ):
     argv = argv or sys.argv[1:]
     include_func_name_in_errors = False
     
@@ -123,9 +126,10 @@ def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
     else:
         raise TypeError('arg is not a Python function or class')
     
-    # Special case for stdin
-    if resolved.pop('optfunc_use_stdin', False):
-        resolved['stdin'] = stdin
+    # Special case for stdin/stdout/stderr
+    for pipe in ('stdin', 'stdout', 'stderr'):
+        if resolved.pop('optfunc_use_%s' % pipe, False):
+            resolved[pipe] = locals()[pipe]
     
     if not errors:
         try:
@@ -141,8 +145,10 @@ def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
 
 def main(*args, **kwargs):
     prev_frame = inspect.stack()[-1][0]
-    if inspect.getmodule(prev_frame).__name__ == '__main__':
+    mod = inspect.getmodule(prev_frame)
+    if mod is not None and mod.__name__ == '__main__':
         run(*args, **kwargs)
+    return args[0] # So it won't break anything if used as a decorator
 
 # Decorators
 def notstrict(fn):

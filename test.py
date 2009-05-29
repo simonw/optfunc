@@ -234,5 +234,37 @@ class TestOptFunc(unittest.TestCase):
         optfunc.run(func, stdin=FakeStdin())
         self.assertEqual(consumed, ['hello'])
     
+    def test_stdout_special_argument(self):
+        def upper(stdin, stdout):
+            stdout.write(stdin.read().upper())
+        
+        class FakeStdin(object):
+            def read(self):
+                return "hello"
+        
+        class FakeStdout(object):
+            written = ''
+            def write(self, w):
+                self.written = w
+        
+        stdout = FakeStdout()
+        self.assertEqual(stdout.written, '')
+        optfunc.run(upper, stdin=FakeStdin(), stdout=stdout)
+        self.assertEqual(stdout.written, 'HELLO')
+    
+    def test_stderr_special_argument(self):
+        def upper(stderr):
+            stderr.write('an error')
+        
+        class FakeStderr(object):
+            written = ''
+            def write(self, w):
+                self.written = w
+        
+        stderr = FakeStderr()
+        self.assertEqual(stderr.written, '')
+        optfunc.run(upper, stderr=stderr)
+        self.assertEqual(stderr.written, 'an error')
+
 if __name__ == '__main__':
     unittest.main()
