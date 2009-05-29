@@ -71,6 +71,10 @@ def resolve_args(func, argv):
     parser, required_args = func_to_optionparser(func)
     options, args = parser.parse_args(argv)
     
+    if 'stdin' in required_args:
+        required_args.remove('stdin')
+        options.optfunc_use_stdin = True
+    
     # Do we have correct number af required args?
     if len(required_args) != len(args):
         if not hasattr(func, 'optfunc_notstrict'):
@@ -85,7 +89,7 @@ def resolve_args(func, argv):
     
     return options.__dict__, parser._errors
 
-def run(func, argv=None, stderr=sys.stderr):
+def run(func, argv=None, stderr=sys.stderr, stdin=sys.stdin):
     argv = argv or sys.argv[1:]
     include_func_name_in_errors = False
     # Deal with multiple functions
@@ -116,6 +120,9 @@ def run(func, argv=None, stderr=sys.stderr):
             resolved, errors = {}, []
     else:
         raise TypeError('arg is not a Python function or class')
+    
+    if resolved.pop('optfunc_use_stdin', False):
+        resolved['stdin'] = stdin
     
     if not errors:
         try:

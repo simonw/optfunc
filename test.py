@@ -221,6 +221,18 @@ class TestOptFunc(unittest.TestCase):
         c = optfunc.run(NoInitClass, [], stderr=e)
         self.assert_(c)
         self.assertEqual(e.getvalue().strip(), '')
-
+    
+    def test_stdin_special_argument(self):
+        consumed = []
+        def func(stdin):
+            consumed.append(stdin.read())
+        
+        class FakeStdin(object):
+            def read(self):
+                return "hello"
+        
+        optfunc.run(func, stdin=FakeStdin())
+        self.assertEqual(consumed, ['hello'])
+    
 if __name__ == '__main__':
     unittest.main()
